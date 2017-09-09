@@ -1,27 +1,27 @@
 {
-    "name": "issyrocks12/flarum-ext-twofactor",
-    "description": "Add TOTP 2 factor authentication",
+    "name": "reflar/twofactor",
+    "description": "Add factor authentication to Flarum",
     "type": "flarum-extension",
     "keywords": ["twofactor"],
     "license": "MIT",
     "authors": [
         {
             "name": "Charlie K",
-            "email": "charlie@jailbreakhub.org"
+            "email": "CDk2020@redevs.org"
         }
     ],
     "support": {
-        "issues": "https://github.com/issyrocks12/flarum-ext-twofactor/issues",
-        "source": "https://github.com/issysrocks12/flarum-ext-twofactor"
+        "issues": "https://gitlab.com/ReDevelopers/ReFlar/twofactor/issues",
+        "source": "https://gitlab.com/ReDevelopers/ReFlar/twofactor"
     },
     "require": {
-        "flarum/core": "^0.1.0-beta.6",
+        "flarum/core": "^0.1.0-beta.7",
         "pragmarx/google2fa": "^v1.0.1"
         
     },
     "autoload": {
         "psr-4": {
-            "issyrocks12\\twofactor\\": "src/"
+            "Reflar\\twofactor\\": "src/"
         }
     },
     "extra": {
@@ -29,7 +29,7 @@
             "dev-master": "0.1.x-dev"
         },
         "flarum-extension": {
-            "title": "Two Factor",
+            "title": "ReFlar Two Factor",
             "icon": {
                 "image": "icon.png",
                 "backgroundColor": "#263238",

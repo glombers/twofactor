@@ -7,7 +7,7 @@ import Switch from 'flarum/components/Switch';
 import Button from 'flarum/components/Button';
 import User from 'flarum/models/User';
 
-import GetVars from 'issyrocks12/twofactor/components/GetVars';
+import GetVars from 'Reflar/twofactor/components/GetVars';
 
 export default class RecoveryModal extends Modal {
 	init() {
@@ -31,7 +31,7 @@ export default class RecoveryModal extends Modal {
   }
 
   title() {
-    return app.translator.trans('issyrocks12-twofactor.forum.modal.twofactor_title');
+    return app.translator.trans('reflar-twofactor.forum.modal.twofactor_title');
   }
 
   content(user) {
@@ -40,8 +40,8 @@ export default class RecoveryModal extends Modal {
         <div className="Form">
 			 <div className="Form-group">
          <div className="TwoFactor-codes">
-           <h3>{app.translator.trans('issyrocks12-twofactor.forum.modal.recov_help1')}</h3>
-           <h4>{app.translator.trans('issyrocks12-twofactor.forum.modal.recov_help2')}</h4>
+           <h3>{app.translator.trans('reflar-twofactor.forum.modal.recov_help1')}</h3>
+           <h4>{app.translator.trans('reflar-twofactor.forum.modal.recov_help2')}</h4>
            <br />
            <h3>{this.recovery1()}</h3>
            <br />
@@ -50,7 +50,7 @@ export default class RecoveryModal extends Modal {
            <h3>{this.recovery3()}</h3>
           </div>
          <Button className="Button Button--primary TwoFactor-button" loading={this.loading} type="submit">
-              {app.translator.trans('issyrocks12-twofactor.forum.modal.close')}
+              {app.translator.trans('reflar-twofactor.forum.modal.close')}
          </Button>
           </div>
         </div>

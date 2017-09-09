@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace issyrocks12\twofactor\Api\Controllers;
+namespace Reflar\twofactor\Api\Controllers;
 
 use Flarum\Core\Exception\PermissionDeniedException;
 use Flarum\Core\Repository\UserRepository;
@@ -17,8 +17,8 @@ use Flarum\Http\AccessToken;
 use Flarum\Http\Controller\ControllerInterface;
 use Illuminate\Contracts\Bus\Dispatcher as BusDispatcher;
 use Illuminate\Contracts\Events\Dispatcher as EventDispatcher;
-use issyrocks12\twofactor\TwoFactor;
 use Psr\Http\Message\ServerRequestInterface;
+use Reflar\twofactor\TwoFactor;
 use Zend\Diactoros\Response\JsonResponse;
 
 class TokenController implements ControllerInterface
@@ -84,22 +84,22 @@ class TokenController implements ControllerInterface
                 $token->save();
 
                 return new JsonResponse([
-                            'token'  => $token->id,
-                            'userId' => $user->id,
-                        ]);
+                    'token' => $token->id,
+                    'userId' => $user->id,
+                ]);
             } else {
                 return new JsonResponse([
-                            'code' => '404',
-                        ]);
+                    'code' => '404',
+                ]);
             }
         } else {
             $token = AccessToken::generate($user->id, $lifetime);
             $token->save();
 
             return new JsonResponse([
-                    'token'  => $token->id,
-                    'userId' => $user->id,
-                ]);
+                'token' => $token->id,
+                'userId' => $user->id,
+            ]);
         }
     }
 }

@@ -4,3 +4,5 @@ composer.phar
 Thumbs.db
 node_modules
 bower_components
+.idea
+.floo*

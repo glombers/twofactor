@@ -1,6 +1,6 @@
-# Two Factor
+# Two Factor By ReFlar
 
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/issyrocks12/flarum-ext-twofactor/blob/master/LICENSE) [![Latest Stable Version](https://img.shields.io/packagist/v/issyrocks12/flarum-ext-twofactor.svg)](https://github.com/issyrocks12/flarum-ext-twofactor) [![Donate](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://paypal.me/CDK2020)
+[![GitLab license](https://img.shields.io/badge/license-MIT-blue.svg)](https://gitlab.com/ReDevelopers/ReFlar/twofactor/blob/master/LICENSE) [![Latest Stable Version](https://img.shields.io/packagist/v/reflar/twofactor.svg)](https://gitlab.com/ReDevelopers/ReFlar/twofactor/)
 
 ##### Please read the install guide!
 
@@ -22,7 +22,7 @@ This extension requires a bit more setup. These steps are optional but will grea
 First install it with composer:
 
 ```bash
-composer require issyrocks12/flarum-ext-twofactor
+composer require reflar/twofactor
 ```
 
 Then login and enable the extension.
@@ -57,6 +57,5 @@ A: This extension uses a custom login handler and therefore a different url to s
 
 ### Links
 
-- [on github](https://github.com/issyrocks12/flarum-ext-twofactor)
-- [on packagist](https://packagist.org/packages/issyrocks12/flarum-ext-twofactor)
-- [issues](https://github.com/issyrocks12/flarum-ext-twofactor/issues)
+- [on GitLab](https://gitlab.com/ReDevelopers/ReFlar/twofactor)
+- [Issues](https://gitlab.com/ReDevelopers/ReFlar/twofactor/issues)

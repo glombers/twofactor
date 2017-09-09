@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace issyrocks12\twofactor\Api\Controllers;
+namespace Reflar\twofactor\Api\Controllers;
 
 use Flarum\Api\Client;
 use Flarum\Core\Repository\UserRepository;

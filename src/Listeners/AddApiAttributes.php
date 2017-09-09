@@ -1,30 +1,15 @@
 <?php
 
-namespace issyrocks12\twofactor\Listeners;
+namespace Reflar\twofactor\Listeners;
 
 use Flarum\Api\Serializer\UserSerializer;
 use Flarum\Event\ConfigureApiRoutes;
 use Flarum\Event\PrepareApiAttributes;
 use Illuminate\Contracts\Events\Dispatcher;
-use issyrocks12\twofactor\Api\Controllers\CreateCodeController;
-use issyrocks12\twofactor\Api\Controllers\LogInController;
-use issyrocks12\twofactor\TwoFactor;
+use Reflar\twofactor\Api\Controllers;
 
 class AddApiAttributes
 {
-    /**
-     * @var TwoFactor
-     */
-    private $twoFactor;
-
-    /**
-     * @param twofactor $twofactor
-     */
-    public function __construct(TwoFactor $twoFactor)
-    {
-        $this->TwoFactor = $twoFactor;
-    }
-
     /**
      * @param Dispatcher $events
      */
@@ -40,29 +25,23 @@ class AddApiAttributes
      */
     public function configureApiRoutes(ConfigureApiRoutes $event)
     {
-        $event->post('/issyrocks12/twofactor/createcode', 'issyrocks12.twofactor.createcode', CreateCodeController::class);
-        $event->post('/issyrocks12/twofactor/login', 'issyrocks12.twofactor.login', LogInController::class);
+        $event->get('/twofactor/getsecret', 'twofactor.getsecret', Controllers\GetSecretController::class);
+
+        $event->post('/twofactor/login', 'twofactor.login', Controllers\LogInController::class);
+        $event->post('/twofactor/verifycode', 'twofactor.verifycode', Controllers\VerifyCodeController::class);
     }
 
-     /**
-      * @param PrepareApiAttributes $event
-      */
-     public function addAttributes(PrepareApiAttributes $event)
-     {
-         if ($event->isSerializer(UserSerializer::class)) {
-             $codes = explode(',', $event->model->recovery_codes);
-             $url = $this->TwoFactor->getURL($event->actor);
-           
-             if ($event->actor->id === $event->model->id) {
-                $event->attributes['url'] = $url;
-                $event->attributes['enabled'] = $event->model->twofa_enabled;
-                $event->attributes['secret'] = chunk_split($event->model->google2fa_secret, 4, ' ');
-                $event->attributes['recovery1'] = $codes[0];
-                $event->attributes['recovery2'] = $codes[1];
-                $event->attributes['recovery3'] = $codes[2];
-              }
-         }
-     }
+    /**
+     * @param PrepareApiAttributes $event
+     */
+    public function addAttributes(PrepareApiAttributes $event)
+    {
+        if ($event->isSerializer(UserSerializer::class)) {
+            if ($event->actor->id === $event->model->id) {
+                $event->attributes['twofa-enabled'] = $event->model->twofa_enabled;
+            }
+        }
+    }
 
     public function configLocales(ConfigureLocales $event)
     {

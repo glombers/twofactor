@@ -1,6 +1,6 @@
 <?php
 
-namespace issyrocks12\twofactor\Exceptions;
+namespace Reflar\twofactor\Exceptions;
 
 use Exception;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace issyrocks12\twofactor\Listeners;
+namespace Reflar\twofactor\Listeners;
 
 use DirectoryIterator;
 use Flarum\Event\ConfigureLocales;
@@ -28,7 +28,7 @@ class AddClientAssets
                 __DIR__.'/../../js/forum/dist/extension.js',
                 __DIR__.'/../../less/forums/TwoFactor.less',
             ]);
-            $event->addBootstrapper('issyrocks12/twofactor/main');
+            $event->addBootstrapper('Reflar/twofactor/main');
         }
     }
 

@@ -1,9 +1,9 @@
-var gulp = require('flarum-gulp');
+var gulp = require('flarum-gulp')
 
 gulp({
-    modules: {
-        'issyrocks12/twofactor': [
-            'src/**/*.js'
-        ]
-    }
-});
+  modules: {
+    'Reflar/twofactor': [
+      'src/**/*.js'
+    ]
+  }
+})
