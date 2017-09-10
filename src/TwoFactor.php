@@ -4,6 +4,10 @@ namespace Reflar\twofactor;
 
 use Flarum\Settings\SettingsRepositoryInterface;
 use PragmaRX\Google2FA\Google2FA;
+use Illuminate\Contracts\Hashing\Hasher;
+use Illuminate\Contracts\Mail\Mailer;
+use Illuminate\Mail\Message;
+use Symfony\Component\Translation\TranslatorInterface;
 
 class TwoFactor
 {
@@ -18,13 +22,36 @@ class TwoFactor
     protected $google2fa;
 
     /**
+     * @var Hasher
+     */
+    protected $hasher;
+
+    /**
+     * @var MAiler
+     */
+    protected $mailer;
+
+    /**
+     * @var TranslatorInterface
+     */
+    protected $translator;
+
+    /**
+     * TwoFactor constructor.
+     *
      * @param SettingsRepositoryInterface $settings
      * @param Google2FA                   $google2fa
+     * @param Hasher                      $hasher
+     * @param Mailer                      $mailer
+     * @param TranslatorInterface         $translator
      */
-    public function __construct(SettingsRepositoryInterface $settings, Google2FA $google2fa)
+    public function __construct(SettingsRepositoryInterface $settings, Google2FA $google2fa, Hasher $hasher, Mailer $mailer, TranslatorInterface $translator)
     {
         $this->google2fa = $google2fa;
         $this->settings = $settings;
+        $this->hasher = $hasher;
+        $this->mailer = $mailer;
+        $this->translator = $translator;
     }
 
     public function prepare2Factor($user)
@@ -60,22 +87,31 @@ class TwoFactor
         );
     }
 
-    public function generateRecoveryCodes()
+    public function generateRandom6String()
     {
-        $randstr = '';
+        $randst = '';
         $chars = [
             '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
             'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
         ];
-        for ($i = 0; $i < 3; ++$i) {
-            for ($rand = 0; $rand < 7; ++$rand) {
-                $random = rand(0, count($chars) - 1);
-                if ($rand == 3) {
-                    $randstr .= '-';
-                } else {
-                    $randstr .= $chars[$random];
-                }
+        for ($rand = 0; $rand < 7; ++$rand) {
+            $random = rand(0, count($chars) - 1);
+            if ($rand == 3) {
+                $randst .= '-';
+            } else {
+                $randst .= $chars[$random];
             }
+        }
+
+        return $randst;
+    }
+
+    public function generateRecoveryCodes()
+    {
+        $randstr = '';
+        for ($i = 0; $i < 3; ++$i) {
+            $randst = $this->generateRandom6String();
+            $randstr .= $this->hasher->make($randst);
             if ($i !== 2) {
                 $randstr .= ',';
             }
@@ -84,25 +120,48 @@ class TwoFactor
         return $randstr;
     }
 
+    public function preparePhone2FA($user, $phone)
+    {
+        $user->phone = $phone;
+        $user->recovery_codes = $this->generateRecoveryCodes();
+        $user->twofa_enabled = 3;
+
+        $this->sendText($user);
+
+        $user->save();
+    }
+
     public function doRecovery($code, $user)
     {
         $code = strtoupper($code);
         $codes = explode(',', $user->recovery_codes);
-        if (in_array($code, $codes)) {
-            if (($key = array_search($code, $codes)) !== false) {
-                unset($codes[$key]);
-            }
-            $user->recovery_codes = implode(',', $codes);
-            $user->save();
 
-            return true;
-        } else {
-            return false;
+        $return = false;
+        for ($i = 0; $i <= count($codes); ++$i) {
+            if ($this->hasher->check($codes[$i], $code)) {
+                unset($codes[$i]);
+                $return = true;
+                break;
+            }
         }
+        $user->recovery_codes = implode(',', $codes);
+        $user->save();
+
+        return $return;
     }
 
     public function verifyCode($user, $input)
     {
         return $this->google2fa->verifyKey($user->google2fa_secret, $input);
+    }
+
+    public function sendText($user)
+    {
+        $randst = $this->generateRandom6String();
+        $user->text_code = $randst;
+
+        $this->mailer->raw($this->translator->trans('reflar-twofactor.forum.text', ['string' => $randst]), function (Message $message) use ($user) {
+            $message->to($user->phone.'@'.$user->carrier);
+        });
     }
 }

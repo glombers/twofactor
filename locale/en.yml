@@ -1,5 +1,6 @@
-issyrocks12-twofactor:
+reflar-twofactor:
   forum:
+    text: "Your verification code is string"
     accountlabel: Two Factor
     reloadmsg: Preparing two factor... please reopen the two factor window.
     incorrect_2fa: Invalid one time passcode
@@ -10,7 +11,7 @@ issyrocks12-twofactor:
       twofactor_title: Two Factor Setup
       heading: Two Factor settings
       switch: Two Factor
-      QRheading: Two Factor Code
+      2fa_heading: Two Factor Code
       help: Scan the QR code, or manually add the code to Google Authenticator or another TOTP app.
       placeholder: One time passcode
       button: Submit

@@ -15,6 +15,7 @@ namespace Reflar\twofactor\Api\Controllers;
 use Flarum\Api\Controller\AbstractCollectionController;
 use Psr\Http\Message\ServerRequestInterface;
 use Tobscure\JsonApi\Document;
+use Reflar\twofactor\Carrier;
 use Reflar\twofactor\TwoFactor;
 
 class VerifyCodeController extends AbstractCollectionController
@@ -40,6 +41,13 @@ class VerifyCodeController extends AbstractCollectionController
      */
     protected function data(ServerRequestInterface $request, Document $document)
     {
-        $data = array_get($request->getParsedBody(), 'data', []);
+        $data = $request->getParsedBody();
+        $actor = $request->getAttribute('actor');
+
+        $carrier = Carrier::orderBy('identifier', 'asc')->skip($data['carrier'])->take(1)->first();
+
+        $actor->carrier = $carrier->email;
+
+        $this->twoFactor->preparePhone2FA($actor, $data['phone']);
     }
 }

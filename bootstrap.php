@@ -8,4 +8,5 @@ return function (Dispatcher $events) {
     $events->subscribe(Listeners\AddClientAssets::class);
     $events->subscribe(Listeners\AddApiAttributes::class);
     $events->subscribe(Listeners\SaveTwoFactorToDatabase::class);
+    $events->subscribe(Listeners\AddCarrierRelationship::class);
 };

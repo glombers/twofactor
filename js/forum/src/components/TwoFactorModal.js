@@ -4,7 +4,7 @@ import {extend} from 'flarum/extend'
 import Modal from 'flarum/components/Modal'
 import Switch from 'flarum/components/Switch'
 import Button from 'flarum/components/Button'
-import RecoveryModal from 'Reflar/twofactor/components/RecoveryModal'
+import PhoneModal from 'Reflar/twofactor/components/PhoneModal'
 
 export default class TwoFactorModal extends Modal {
   init () {
@@ -39,12 +39,22 @@ export default class TwoFactorModal extends Modal {
   }
 
   content (user) {
+    if (this.enabled() === 3) {
+      app.modal.show(new PhoneModal())
+    }
     return (
       <div className='Modal-body'>
         <div className='Form'>
           {this.enabled() === 2 ? (
             <div className='Form-group'>
-              <h2>{app.translator.trans('reflar-twofactor.forum.modal.QRheading')}</h2>
+              <h2>{app.translator.trans('reflar-twofactor.forum.modal.2fa_heading')}</h2>
+              {Button.component({
+                className: 'Button Button--primary Switch-button',
+                onclick: () => {
+                  app.modal.show(new PhoneModal())
+                },
+                children: app.translator.trans('reflar-twofactor.forum.modal.stPhone')
+              })}
               <div className='helpText'>
                 {app.translator.trans('reflar-twofactor.forum.modal.help')}
               </div>
@@ -64,7 +74,7 @@ export default class TwoFactorModal extends Modal {
               </Button>
             </div>
                     ) : ''}
-          {this.enabled() !== 2 ? (
+          {this.enabled() !== 2 && this.enabled() !== 3 ? (
             <div className='Form-group'>
               <label>{app.translator.trans('reflar-twofactor.forum.modal.heading')}</label>
               <div>
@@ -74,10 +84,10 @@ export default class TwoFactorModal extends Modal {
                   className: 'TwoFactor-switch',
                   onchange: (value) => {
                     this.user.save({'enabled': value})
-                                            .then(user => {
-                                              this.enabled(user.twofa_enabled())
-                                              m.redraw()
-                                            })
+                        .then(user => {
+                          this.enabled(user.twofa_enabled())
+                          m.redraw()
+                        })
                   }
                 })}
               </div>

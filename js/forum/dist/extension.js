@@ -127,54 +127,47 @@ System.register('Reflar/twofactor/components/LogInFactorModal', ['flarum/app', '
 })
 'use strict'
 
-System.register('Reflar/twofactor/components/RecoveryModal', ['flarum/app', 'flarum/components/Alert', 'flarum/extend', 'flarum/components/Modal', 'flarum/Model', 'flarum/components/Switch', 'flarum/components/Button', 'flarum/models/User', 'Reflar/twofactor/components/GetVars'], function (_export, _context) {
+System.register('Reflar/twofactor/components/PhoneModal', ['flarum/app', 'flarum/extend', 'flarum/components/Modal', 'flarum/components/Select', 'flarum/components/Button', './TwoFactorModal'], function (_export, _context) {
   'use strict'
 
-  var app, Alert, extend, Modal, Model, Switch, Button, User, GetVars, RecoveryModal
+  var app, extend, Modal, Select, Button, TwoFactorModal, PhoneModal
   return {
     setters: [function (_flarumApp) {
       app = _flarumApp.default
-    }, function (_flarumComponentsAlert) {
-      Alert = _flarumComponentsAlert.default
     }, function (_flarumExtend) {
       extend = _flarumExtend.extend
     }, function (_flarumComponentsModal) {
       Modal = _flarumComponentsModal.default
-    }, function (_flarumModel) {
-      Model = _flarumModel.default
-    }, function (_flarumComponentsSwitch) {
-      Switch = _flarumComponentsSwitch.default
+    }, function (_flarumComponentsSelect) {
+      Select = _flarumComponentsSelect.default
     }, function (_flarumComponentsButton) {
       Button = _flarumComponentsButton.default
-    }, function (_flarumModelsUser) {
-      User = _flarumModelsUser.default
-    }, function (_ReflarTwofactorComponentsGetVars) {
-      GetVars = _ReflarTwofactorComponentsGetVars.default
+    }, function (_TwoFactorModal) {
+      TwoFactorModal = _TwoFactorModal.default
     }],
     execute: function () {
-      RecoveryModal = (function (_Modal) {
-        babelHelpers.inherits(RecoveryModal, _Modal)
+      PhoneModal = (function (_Modal) {
+        babelHelpers.inherits(PhoneModal, _Modal)
 
-        function RecoveryModal () {
-          babelHelpers.classCallCheck(this, RecoveryModal)
-          return babelHelpers.possibleConstructorReturn(this, (RecoveryModal.__proto__ || Object.getPrototypeOf(RecoveryModal)).apply(this, arguments))
+        function PhoneModal () {
+          babelHelpers.classCallCheck(this, PhoneModal)
+          return babelHelpers.possibleConstructorReturn(this, (PhoneModal.__proto__ || Object.getPrototypeOf(PhoneModal)).apply(this, arguments))
         }
 
-        babelHelpers.createClass(RecoveryModal, [{
+        babelHelpers.createClass(PhoneModal, [{
           key: 'init',
           value: function init () {
-            babelHelpers.get(RecoveryModal.prototype.__proto__ || Object.getPrototypeOf(RecoveryModal.prototype), 'init', this).call(this)
+            babelHelpers.get(PhoneModal.prototype.__proto__ || Object.getPrototypeOf(PhoneModal.prototype), 'init', this).call(this)
 
-            this.model = new GetVars(app.session.user)
+            this.twoFactorCode = m.prop('')
+            this.carrier = m.prop('')
+            this.phone = m.prop('')
 
-            var recovery1 = this.model.getRecovery1()
-            this.recovery1 = m.prop(recovery1)
+            this.enabled = m.prop(app.session.user.twofa_enabled())
 
-            var recovery2 = this.model.getRecovery2()
-            this.recovery2 = m.prop(recovery2)
-
-            var recovery3 = this.model.getRecovery3()
-            this.recovery3 = m.prop(recovery3)
+            $.getScript('https://cdn.rawgit.com/igorescobar/jQuery-Mask-Plugin/master/src/jquery.mask.js', function () {
+              $('#phone').mask('(000) 000-0000')
+            })
           }
         }, {
           key: 'className',
@@ -189,75 +182,80 @@ System.register('Reflar/twofactor/components/RecoveryModal', ['flarum/app', 'fla
         }, {
           key: 'content',
           value: function content (user) {
+            var _this2 = this
+
             return m(
-              'div',
-              { className: 'Modal-body' },
-              m(
-                'div',
-                { className: 'Form' },
-                m(
-                  'div',
-                  { className: 'Form-group' },
-                  m(
-                    'div',
-                    { className: 'TwoFactor-codes' },
-                    m(
-                      'h3',
-                      null,
-                      app.translator.trans('reflar-twofactor.forum.modal.recov_help1')
-                    ),
-                    m(
-                      'h4',
-                      null,
-                      app.translator.trans('reflar-twofactor.forum.modal.recov_help2')
-                    ),
-                    m('br', null),
-                    m(
-                      'h3',
-                      null,
-                      this.recovery1()
-                    ),
-                    m('br', null),
-                    m(
-                      'h3',
-                      null,
-                      this.recovery2()
-                    ),
-                    m('br', null),
-                    m(
-                      'h3',
-                      null,
-                      this.recovery3()
-                    )
-                  ),
-                  m(
-                    Button,
-                    { className: 'Button Button--primary TwoFactor-button', loading: this.loading, type: 'submit' },
-                    app.translator.trans('reflar-twofactor.forum.modal.close')
-                  )
-                )
-              )
-            )
-          }
-        }, {
-          key: 'onsubmit',
-          value: function onsubmit (e) {
-            app.modal.close()
+                            'div',
+                            { className: 'Modal-body' },
+                            m(
+                                'div',
+                                { className: 'Form-group' },
+                                m(
+                                    'h2',
+                                    null,
+                                    app.translator.trans('reflar-twofactor.forum.modal.2fa_heading')
+                                ),
+                                this.enabled() !== 3 ? Button.component({
+                                  className: 'Button Button--primary',
+                                  style: 'margin: 0 auto;',
+                                  onclick: function onclick () {
+                                    app.modal.show(new TwoFactorModal(_this2.user))
+                                  },
+                                  children: app.translator.trans('reflar-twofactor.forum.modal.stTOTP')
+                                }) : '',
+                                m(
+                                    'div',
+                                    { className: 'helpText' },
+                                    app.translator.trans('reflar-twofactor.forum.modal.help')
+                                ),
+                                Select.component({
+                                  options: app.forum.attribute('carriers'),
+                                  value: this.carrier(),
+                                  onchange: this.carrier
+                                }),
+                                m('input', { type: 'text',
+                                  id: 'phone',
+                                  style: 'margin-right: 15px;',
+                                  oninput: m.withAttr('value', this.phone),
+                                  className: 'FormControl' }),
+                                Button.component({
+                                  className: 'Button Button--primary',
+                                  onclick: function onclick () {
+                                    app.request({
+                                      url: app.forum.attribute('apiUrl') + '/twofactor/verifycode',
+                                      method: 'POST',
+                                      data: {
+                                        'phone': _this2.phone().replace(/[- )(]/g, ''),
+                                        'carrier': _this2.carrier()
+                                      }
+                                    })
+                                  },
+                                  children: app.translator.trans('reflar-twofactor.forum.modal.submitPhone')
+                                }),
+                                m(
+                                    Button,
+                                  { className: 'Button Button--primary TwoFactor-button',
+                                    loading: this.loading,
+                                    type: 'submit' },
+                                    app.translator.trans('reflar-twofactor.forum.modal.button')
+                                )
+                            )
+                        )
           }
         }])
-        return RecoveryModal
+        return PhoneModal
       }(Modal))
 
-      _export('default', RecoveryModal)
+      _export('default', PhoneModal)
     }
   }
 })
 'use strict'
 
-System.register('Reflar/twofactor/components/TwoFactorModal', ['flarum/app', 'flarum/components/Alert', 'flarum/extend', 'flarum/components/Modal', 'flarum/components/Switch', 'flarum/components/Button', 'Reflar/twofactor/components/RecoveryModal'], function (_export, _context) {
+System.register('Reflar/twofactor/components/TwoFactorModal', ['flarum/app', 'flarum/components/Alert', 'flarum/extend', 'flarum/components/Modal', 'flarum/components/Switch', 'flarum/components/Button', 'Reflar/twofactor/components/PhoneModal'], function (_export, _context) {
   'use strict'
 
-  var app, Alert, extend, Modal, Switch, Button, RecoveryModal, TwoFactorModal
+  var app, Alert, extend, Modal, Switch, Button, PhoneModal, TwoFactorModal
   return {
     setters: [function (_flarumApp) {
       app = _flarumApp.default
@@ -271,8 +269,8 @@ System.register('Reflar/twofactor/components/TwoFactorModal', ['flarum/app', 'fl
       Switch = _flarumComponentsSwitch.default
     }, function (_flarumComponentsButton) {
       Button = _flarumComponentsButton.default
-    }, function (_ReflarTwofactorComponentsRecoveryModal) {
-      RecoveryModal = _ReflarTwofactorComponentsRecoveryModal.default
+    }, function (_ReflarTwofactorComponentsPhoneModal) {
+      PhoneModal = _ReflarTwofactorComponentsPhoneModal.default
     }],
     execute: function () {
       TwoFactorModal = (function (_Modal) {
@@ -324,114 +322,124 @@ System.register('Reflar/twofactor/components/TwoFactorModal', ['flarum/app', 'fl
           value: function content (user) {
             var _this3 = this
 
+            if (this.enabled() === 3) {
+              app.modal.show(new PhoneModal())
+            }
             return m(
-                            'div',
-                            { className: 'Modal-body' },
-                            m(
-                                'div',
-                                { className: 'Form' },
-                                this.enabled() === 2 ? m(
-                                    'div',
-                                    { className: 'Form-group' },
-                                    m(
-                                        'h2',
-                                        null,
-                                        app.translator.trans('reflar-twofactor.forum.modal.QRheading')
-                                    ),
-                                    m(
-                                        'div',
-                                        { className: 'helpText' },
-                                        app.translator.trans('reflar-twofactor.forum.modal.help')
-                                    ),
-                                    m(
-                                        'div',
-                                        { className: 'TwoFactor-img' },
-                                        m('img', { src: this.url() }),
-                                        m(
-                                            'h3',
-                                            null,
-                                            this.secret()
-                                        )
-                                    ),
-                                    m(
-                                        'div',
-                                        { className: 'TwoFactor-input' },
-                                        m('input', { type: 'text',
-                                          oninput: m.withAttr('value', this.twoFactorCode),
-                                          className: 'FormControl',
-                                          placeholder: app.translator.trans('reflar-twofactor.forum.modal.placeholder') })
-                                    ),
-                                    m(
-                                        Button,
-                                      { className: 'Button Button--primary TwoFactor-button',
-                                        loading: this.loading,
-                                        type: 'submit' },
-                                        app.translator.trans('reflar-twofactor.forum.modal.button')
-                                    )
-                                ) : '',
-                                this.enabled() !== 2 ? m(
-                                    'div',
-                                    { className: 'Form-group' },
-                                    m(
-                                        'label',
-                                        null,
-                                        app.translator.trans('reflar-twofactor.forum.modal.heading')
-                                    ),
-                                    m(
-                                        'div',
-                                        null,
-                                        Switch.component({
-                                          state: this.enabled(),
-                                          children: app.translator.trans('reflar-twofactor.forum.modal.switch'),
-                                          className: 'TwoFactor-switch',
-                                          onchange: function onchange (value) {
-                                            _this3.user.save({ 'enabled': value }).then(function (user) {
-                                              _this3.enabled(user.twofa_enabled())
-                                              m.redraw()
-                                            })
-                                          }
-                                        })
-                                    )
-                                ) : ''
-                            )
-                        )
+              'div',
+              { className: 'Modal-body' },
+              m(
+                'div',
+                { className: 'Form' },
+                this.enabled() === 2 ? m(
+                  'div',
+                  { className: 'Form-group' },
+                  m(
+                    'h2',
+                    null,
+                    app.translator.trans('reflar-twofactor.forum.modal.2fa_heading')
+                  ),
+                  Button.component({
+                    className: 'Button Button--primary Switch-button',
+                    onclick: function onclick () {
+                      app.modal.show(new PhoneModal())
+                    },
+                    children: app.translator.trans('reflar-twofactor.forum.modal.stPhone')
+                  }),
+                  m(
+                    'div',
+                    { className: 'helpText' },
+                    app.translator.trans('reflar-twofactor.forum.modal.help')
+                  ),
+                  m(
+                    'div',
+                    { className: 'TwoFactor-img' },
+                    m('img', { src: this.url() }),
+                    m(
+                      'h3',
+                      null,
+                      this.secret()
+                    )
+                  ),
+                  m(
+                    'div',
+                    { className: 'TwoFactor-input' },
+                    m('input', { type: 'text',
+                      oninput: m.withAttr('value', this.twoFactorCode),
+                      className: 'FormControl',
+                      placeholder: app.translator.trans('reflar-twofactor.forum.modal.placeholder') })
+                  ),
+                  m(
+                    Button,
+                    { className: 'Button Button--primary TwoFactor-button',
+                      loading: this.loading,
+                      type: 'submit' },
+                    app.translator.trans('reflar-twofactor.forum.modal.button')
+                  )
+                ) : '',
+                this.enabled() !== 2 && this.enabled() !== 3 ? m(
+                  'div',
+                  { className: 'Form-group' },
+                  m(
+                    'label',
+                    null,
+                    app.translator.trans('reflar-twofactor.forum.modal.heading')
+                  ),
+                  m(
+                    'div',
+                    null,
+                    Switch.component({
+                      state: this.enabled(),
+                      children: app.translator.trans('reflar-twofactor.forum.modal.switch'),
+                      className: 'TwoFactor-switch',
+                      onchange: function onchange (value) {
+                        _this3.user.save({ 'enabled': value }).then(function (user) {
+                          _this3.enabled(user.twofa_enabled())
+                          m.redraw()
+                        })
+                      }
+                    })
+                  )
+                ) : ''
+              )
+            )
           }
         }, {
           key: 'onsubmit',
           value: function onsubmit (e) {
-              e.preventDefault()
+            e.preventDefault()
 
-              if (this.loading) return
+            if (this.loading) return
 
-              this.loading = true
+            this.loading = true
 
-              app.request({
-                url: app.forum.attribute('apiUrl') + '/twofactor/createcode',
-                method: 'POST',
-                data: { 'twofactor': this.twoFactorCode() },
-                errorHandler: this.onerror.bind(this)
-              }).then(this.success.bind(this))
-              this.loading = false
-            }
+            app.request({
+              url: app.forum.attribute('apiUrl') + '/twofactor/verifycode',
+              method: 'POST',
+              data: { 'twofactor': this.twoFactorCode() },
+              errorHandler: this.onerror.bind(this)
+            }).then(this.success.bind(this))
+            this.loading = false
+          }
         }, {
-            key: 'success',
-            value: function success (response) {
-              app.alerts.show(this.successAlert = new Alert({
-                  type: 'success',
-                  children: app.translator.trans('reflar-twofactor.forum.2fa_enabled')
-                }))
-              app.modal.show(new RecoveryModal())
+          key: 'success',
+          value: function success (response) {
+            app.alerts.show(this.successAlert = new Alert({
+              type: 'success',
+              children: app.translator.trans('reflar-twofactor.forum.2fa_enabled')
+            }))
+            app.modal.show(new RecoveryModal())
+          }
+        }, {
+          key: 'onerror',
+          value: function onerror (error) {
+            if (error.status === 500) {
+              error.alert.props.children = app.translator.trans('reflar-twofactor.forum.incorrect_2fa')
             }
-          }, {
-            key: 'onerror',
-            value: function onerror (error) {
-                if (error.status === 500) {
-                      error.alert.props.children = app.translator.trans('reflar-twofactor.forum.incorrect_2fa')
-                    }
 
-                babelHelpers.get(TwoFactorModal.prototype.__proto__ || Object.getPrototypeOf(TwoFactorModal.prototype), 'onerror', this).call(this, error)
-              }
-          }])
+            babelHelpers.get(TwoFactorModal.prototype.__proto__ || Object.getPrototypeOf(TwoFactorModal.prototype), 'onerror', this).call(this, error)
+          }
+        }])
         return TwoFactorModal
       }(Modal))
 
@@ -461,20 +469,20 @@ System.register('Reflar/twofactor/main', ['flarum/extend', 'flarum/app', 'flarum
     }, function (_flarumComponentsLogInButtons) {
       LogInButtons = _flarumComponentsLogInButtons.default
     }, function (_ReflarTwofactorComponentsLogInFactorModal) {
-        LogInFactorModal = _ReflarTwofactorComponentsLogInFactorModal.default
-      }, function (_flarumComponentsLogInModal) {
-        LogInModal = _flarumComponentsLogInModal.default
-      }, function (_flarumModel) {
-          Model = _flarumModel.default
-        }, function (_flarumComponentsSettingsPage) {
-          SettingsPage = _flarumComponentsSettingsPage.default
-        }, function (_flarumComponentsSignUpModal) {
-          SignUpModal = _flarumComponentsSignUpModal.default
-        }, function (_ReflarTwofactorComponentsTwoFactorModal) {
-          TwoFactorModal = _ReflarTwofactorComponentsTwoFactorModal.default
-        }, function (_flarumModelsUser) {
-          User = _flarumModelsUser.default
-        }],
+      LogInFactorModal = _ReflarTwofactorComponentsLogInFactorModal.default
+    }, function (_flarumComponentsLogInModal) {
+      LogInModal = _flarumComponentsLogInModal.default
+    }, function (_flarumModel) {
+      Model = _flarumModel.default
+    }, function (_flarumComponentsSettingsPage) {
+      SettingsPage = _flarumComponentsSettingsPage.default
+    }, function (_flarumComponentsSignUpModal) {
+      SignUpModal = _flarumComponentsSignUpModal.default
+    }, function (_ReflarTwofactorComponentsTwoFactorModal) {
+      TwoFactorModal = _ReflarTwofactorComponentsTwoFactorModal.default
+    }, function (_flarumModelsUser) {
+      User = _flarumModelsUser.default
+    }],
     execute: function () {
       app.initializers.add('reflar-twofactor', function () {
         User.prototype.twofa_enabled = Model.attribute('twofa-enabled')
@@ -488,69 +496,69 @@ System.register('Reflar/twofactor/main', ['flarum/extend', 'flarum/app', 'flarum
         }
         LogInModal.prototype.content = function () {
           return [m(
-                        'div',
-                        { className: 'Modal-body' },
-                        m(LogInButtons, null),
-                        m(
-                            'div',
-                            { className: 'Form Form--centered' },
-                            m(
-                                'div',
-                                { className: 'Form-group' },
-                                m('input', { className: 'FormControl',
-                                  name: 'identification',
-                                  type: 'text',
-                                  placeholder: extractText(app.translator.trans('core.forum.log_in.username_or_email_placeholder')),
-                                  bidi: this.identification,
-                                  disabled: this.loading })
-                            ),
-                            m(
-                                'div',
-                                { className: 'Form-group' },
-                                m('input', { className: 'FormControl',
-                                  name: 'password',
-                                  type: 'password',
-                                  placeholder: extractText(app.translator.trans('core.forum.log_in.password_placeholder')),
-                                  bidi: this.password,
-                                  disabled: this.loading })
-                            ),
-                            m(
-                                'label',
-                                { className: 'checkbox' },
-                                m('input', { name: 'remember', type: 'checkbox', bidi: this.remember, disabled: this.loading }),
-                                app.translator.trans('reflar-twofactor.forum.remember_me_label')
-                            ),
-                            m(
-                                'div',
-                                { className: 'Form-group' },
-                                Button.component({
-                                  className: 'Button Button--primary Button--block',
-                                  type: 'submit',
-                                  loading: this.loading,
-                                  children: app.translator.trans('core.forum.log_in.submit_button')
-                                })
-                            )
-                        )
-                    ), m(
-                        'div',
-                        { className: 'Modal-footer' },
-                        m(
-                            'p',
-                            { className: 'LogInModal-forgotPassword' },
-                            m(
-                                'a',
-                                { onclick: this.forgotPassword.bind(this) },
-                                app.translator.trans('core.forum.log_in.forgot_password_link')
-                            )
-                        ),
-                        app.forum.attribute('allowSignUp') ? m(
-                            'p',
-                            { className: 'LogInModal-signUp' },
-                            app.translator.trans('core.forum.log_in.sign_up_text', {
-                              a: m('a', { onclick: this.signUp.bind(this) })
-                            })
-                        ) : ''
-                    )]
+            'div',
+            { className: 'Modal-body' },
+            m(LogInButtons, null),
+            m(
+              'div',
+              { className: 'Form Form--centered' },
+              m(
+                'div',
+                { className: 'Form-group' },
+                m('input', { className: 'FormControl',
+                  name: 'identification',
+                  type: 'text',
+                  placeholder: extractText(app.translator.trans('core.forum.log_in.username_or_email_placeholder')),
+                  bidi: this.identification,
+                  disabled: this.loading })
+              ),
+              m(
+                'div',
+                { className: 'Form-group' },
+                m('input', { className: 'FormControl',
+                  name: 'password',
+                  type: 'password',
+                  placeholder: extractText(app.translator.trans('core.forum.log_in.password_placeholder')),
+                  bidi: this.password,
+                  disabled: this.loading })
+              ),
+              m(
+                'label',
+                { className: 'checkbox' },
+                m('input', { name: 'remember', type: 'checkbox', bidi: this.remember, disabled: this.loading }),
+                app.translator.trans('reflar-twofactor.forum.remember_me_label')
+              ),
+              m(
+                'div',
+                { className: 'Form-group' },
+                Button.component({
+                  className: 'Button Button--primary Button--block',
+                  type: 'submit',
+                  loading: this.loading,
+                  children: app.translator.trans('core.forum.log_in.submit_button')
+                })
+              )
+            )
+          ), m(
+            'div',
+            { className: 'Modal-footer' },
+            m(
+              'p',
+              { className: 'LogInModal-forgotPassword' },
+              m(
+                'a',
+                { onclick: this.forgotPassword.bind(this) },
+                app.translator.trans('core.forum.log_in.forgot_password_link')
+              )
+            ),
+            app.forum.attribute('allowSignUp') ? m(
+              'p',
+              { className: 'LogInModal-signUp' },
+              app.translator.trans('core.forum.log_in.sign_up_text', {
+                a: m('a', { onclick: this.signUp.bind(this) })
+              })
+            ) : ''
+          )]
         }
         LogInModal.prototype.forgotPassword = function () {
           var email = this.identification()
@@ -607,7 +615,7 @@ System.register('Reflar/twofactor/main', ['flarum/extend', 'flarum/app', 'flarum
           }
         }
 
-        extend(SettingsPage.prototype, 'accountItems', function (items, user) {
+        extend(SettingsPage.prototype, 'accountItems', function (items) {
           items.add('2 Factor', Button.component({
             className: 'Button',
             onclick: function onclick () {

@@ -129,7 +129,7 @@ app.initializers.add('reflar-twofactor', () => {
     }
   }
 
-  extend(SettingsPage.prototype, 'accountItems', (items, user) => {
+  extend(SettingsPage.prototype, 'accountItems', (items) => {
     items.add('2 Factor',
                 Button.component({
                   className: 'Button',

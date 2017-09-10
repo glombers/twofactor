@@ -1,64 +1,79 @@
-import app from 'flarum/app';
-import Alert from 'flarum/components/Alert';
-import { extend } from 'flarum/extend';
-import Modal from 'flarum/components/Modal';
-import Model from 'flarum/Model';
-import Switch from 'flarum/components/Switch';
-import Button from 'flarum/components/Button';
-import User from 'flarum/models/User';
+import app from 'flarum/app'
+import {extend} from 'flarum/extend'
+import Modal from 'flarum/components/Modal'
+import Select from 'flarum/components/Select'
+import Button from 'flarum/components/Button'
+import TwoFactorModal from './TwoFactorModal'
 
-import GetVars from 'Reflar/twofactor/components/GetVars';
+export default class PhoneModal extends Modal {
+  init () {
+    super.init()
 
-export default class RecoveryModal extends Modal {
-	init() {
-    super.init();
-    
-    this.model = new GetVars(app.session.user)
-    
-		const recovery1 = this.model.getRecovery1();
-    this.recovery1 = m.prop(recovery1);
-    
-    const recovery2 = this.model.getRecovery2();
-    this.recovery2 = m.prop(recovery2);
-    
-    const recovery3 = this.model.getRecovery3();
-    this.recovery3 = m.prop(recovery3);
-		
+    this.twoFactorCode = m.prop('')
+    this.carrier = m.prop('')
+    this.phone = m.prop('')
+
+    this.enabled = m.prop(app.session.user.twofa_enabled())
+
+    $.getScript('https://cdn.rawgit.com/igorescobar/jQuery-Mask-Plugin/master/src/jquery.mask.js', function () {
+      $('#phone').mask('(000) 000-0000')
+    })
   }
 
-  className() {
-    return 'TwoFactorModal Modal--small';
+  className () {
+    return 'TwoFactorModal Modal--small'
   }
 
-  title() {
-    return app.translator.trans('reflar-twofactor.forum.modal.twofactor_title');
+  title () {
+    return app.translator.trans('reflar-twofactor.forum.modal.twofactor_title')
   }
 
-  content(user) {
+  content (user) {
     return (
-      <div className="Modal-body">
-        <div className="Form">
-			 <div className="Form-group">
-         <div className="TwoFactor-codes">
-           <h3>{app.translator.trans('reflar-twofactor.forum.modal.recov_help1')}</h3>
-           <h4>{app.translator.trans('reflar-twofactor.forum.modal.recov_help2')}</h4>
-           <br />
-           <h3>{this.recovery1()}</h3>
-           <br />
-           <h3>{this.recovery2()}</h3>
-           <br />
-           <h3>{this.recovery3()}</h3>
+      <div className='Modal-body'>
+        <div className='Form-group'>
+          <h2>{app.translator.trans('reflar-twofactor.forum.modal.2fa_heading')}</h2>
+          {this.enabled() !== 3 ? Button.component({
+            className: 'Button Button--primary',
+            style: 'margin: 0 auto;',
+            onclick: () => {
+              app.modal.show(new TwoFactorModal(this.user))
+            },
+            children: app.translator.trans('reflar-twofactor.forum.modal.stTOTP')
+          }) : ''}
+          <div className='helpText'>
+            {app.translator.trans('reflar-twofactor.forum.modal.help')}
           </div>
-         <Button className="Button Button--primary TwoFactor-button" loading={this.loading} type="submit">
-              {app.translator.trans('reflar-twofactor.forum.modal.close')}
-         </Button>
-          </div>
+          {Select.component({
+            options: app.forum.attribute('carriers'),
+            value: this.carrier(),
+            onchange: this.carrier
+          })}
+          <input type='text'
+            id='phone'
+            style='margin-right: 15px;'
+            oninput={m.withAttr('value', this.phone)}
+            className='FormControl' />
+          {Button.component({
+            className: 'Button Button--primary',
+            onclick: () => {
+              app.request({
+                url: app.forum.attribute('apiUrl') + '/twofactor/verifycode',
+                method: 'POST',
+                data: {
+                  'phone': this.phone().replace(/[- )(]/g, ''),
+                  'carrier': this.carrier()
+                }
+              })
+            },
+            children: app.translator.trans('reflar-twofactor.forum.modal.submitPhone')
+          })}
+          <Button className='Button Button--primary TwoFactor-button' loading={this.loading}
+            type='submit'>
+            {app.translator.trans('reflar-twofactor.forum.modal.button')}
+          </Button>
         </div>
       </div>
-    );
+    )
   }
-	
-    onsubmit(e) {
-    app.modal.close();
-    }
 }

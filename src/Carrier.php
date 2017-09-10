@@ -12,6 +12,12 @@
 
 namespace Reflar\twofactor;
 
-class Carrier
+use Flarum\Database\AbstractModel;
+
+class Carrier extends AbstractModel
 {
+    /**
+     * {@inheritdoc}
+     */
+    protected $table = 'carriers';
 }
