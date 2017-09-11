@@ -9,19 +9,17 @@ class TwoFactorSerializer extends AbstractSerializer
     /**
      * @var string
      */
-    protected $type = 'user';
+    protected $type = 'TwoFactor';
 
     /**
      * @param $group
      *
      * @return array
      */
-    protected function getDefaultAttributes($user)
+    protected function getDefaultAttributes($twoFactor)
     {
         return [
-            'secret' => $user->google2fa_secret,
-            'codes' => $user->recovery_codes,
-            'url' => $user->url,
+            'data' => $twoFactor,
         ];
     }
 }

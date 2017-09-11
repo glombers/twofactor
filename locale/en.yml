@@ -12,12 +12,12 @@ reflar-twofactor:
       heading: Two Factor settings
       switch: Two Factor
       2fa_heading: Two Factor Code
-      help: Scan the QR code, or manually add the code to Google Authenticator or another TOTP app.
+      helpQR: Scan the QR code, or manually add the code to Google Authenticator or another TOTP app.
       placeholder: One time passcode
       button: Submit
       2fa_help: Type in the one time passcode from your TOTP app.
       close: I have saved my codes
       recov: Recovery Codes
       login_title: Two Factor Authentication
-      recov_help1: Please save these codes!
-      recov_help2: These are your only way back into your account if you lose access to your TOTP app. These codes will not be shown again.
+      recov_help1: Please save these codes, they will not be shown again!
+      recov_help2: These are your only way back into your account if you lose access to your phone or TOTP app.

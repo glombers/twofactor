@@ -23,8 +23,7 @@ export default class TwoFactorModal extends Modal {
       url: app.forum.attribute('apiUrl') + '/twofactor/getsecret',
       method: 'GET'
     }).then(response => {
-      this.secret(response.data[0].attributes.secret)
-      this.codes(response.data[0].attributes.codes)
+      this.secret(response.data[0].attributes.data.google2fa_secret)
       this.url(response.data[1].id)
       m.redraw()
     })
@@ -45,7 +44,7 @@ export default class TwoFactorModal extends Modal {
     return (
       <div className='Modal-body'>
         <div className='Form'>
-          {this.enabled() === 2 ? (
+          {this.enabled() === 1 ? (
             <div className='Form-group'>
               <h2>{app.translator.trans('reflar-twofactor.forum.modal.2fa_heading')}</h2>
               {Button.component({
@@ -56,10 +55,10 @@ export default class TwoFactorModal extends Modal {
                 children: app.translator.trans('reflar-twofactor.forum.modal.stPhone')
               })}
               <div className='helpText'>
-                {app.translator.trans('reflar-twofactor.forum.modal.help')}
+                {app.translator.trans('reflar-twofactor.forum.modal.helpQR')}
               </div>
               <div className='TwoFactor-img'>
-                <img src={this.url()} />
+                <img src={decodeURIComponent(this.url())} />
                 <h3>{this.secret()}</h3>
               </div>
               <div className='TwoFactor-input'>
@@ -74,7 +73,7 @@ export default class TwoFactorModal extends Modal {
               </Button>
             </div>
                     ) : ''}
-          {this.enabled() !== 2 && this.enabled() !== 3 ? (
+          {this.enabled() !== 1 && this.enabled() !== 3 ? (
             <div className='Form-group'>
               <label>{app.translator.trans('reflar-twofactor.forum.modal.heading')}</label>
               <div>
@@ -83,11 +82,23 @@ export default class TwoFactorModal extends Modal {
                   children: app.translator.trans('reflar-twofactor.forum.modal.switch'),
                   className: 'TwoFactor-switch',
                   onchange: (value) => {
-                    this.user.save({'enabled': value})
-                        .then(user => {
-                          this.enabled(user.twofa_enabled())
-                          m.redraw()
-                        })
+                    app.request({
+                      url: app.forum.attribute('apiUrl') + '/twofactor/verifycode',
+                      method: 'POST',
+                      data: {
+                        'step': value
+                      }
+                    }).then(response => {
+                      this.enabled(+value)
+                      app.request({
+                        url: app.forum.attribute('apiUrl') + '/twofactor/getsecret',
+                        method: 'GET'
+                      }).then(response => {
+                        this.secret(response.data[0].attributes.data.google2fa_secret)
+                        this.url(response.data[1].id)
+                        m.redraw()
+                      })
+                    })
                   }
                 })}
               </div>

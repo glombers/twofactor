@@ -12,14 +12,16 @@
 
 namespace Reflar\twofactor\Api\Controllers;
 
-use Flarum\Api\Controller\AbstractCollectionController;
+use Flarum\Api\Controller\AbstractResourceController;
 use Psr\Http\Message\ServerRequestInterface;
-use Tobscure\JsonApi\Document;
 use Reflar\twofactor\Carrier;
 use Reflar\twofactor\TwoFactor;
+use Tobscure\JsonApi\Document;
 
-class VerifyCodeController extends AbstractCollectionController
+class VerifyCodeController extends AbstractResourceController
 {
+    public $serializer = 'Reflar\twofactor\Api\Serializers\TwoFactorSerializer';
+
     /**
      * @var TwoFactor
      */
@@ -39,15 +41,42 @@ class VerifyCodeController extends AbstractCollectionController
      *
      * @return mixed
      */
-    protected function data(ServerRequestInterface $request, Document $document)
+    public function data(ServerRequestInterface $request, Document $document)
     {
         $data = $request->getParsedBody();
         $actor = $request->getAttribute('actor');
 
-        $carrier = Carrier::orderBy('identifier', 'asc')->skip($data['carrier'])->take(1)->first();
+        $return = '';
 
-        $actor->carrier = $carrier->email;
+        switch ($data['step']) {
+            case 0:
+                $actor->twofa_enabled = 0;
+                $actor->save();
+                break;
+            case 1:
+                $actor->twofa_enabled = 1;
+                $return = $this->twoFactor->prepareTOTP2Factor($actor);
+                $actor->save();
+                break;
+            case 2:
+                $actor->twofa_enabled = 1;
+                $actor->save();
+                // no break
+            case 3:
+                $carrier = Carrier::where('identifier', $data['carrier'])->firstOrFail();
+                $actor->carrier = $carrier->email;
 
-        $this->twoFactor->preparePhone2FA($actor, $data['phone']);
+                $this->twoFactor->preparePhone2Factor($actor, $data['phone']);
+                break;
+            case 4:
+                if ($this->twoFactor->verifyPhoneCode($actor, strtoupper($data['code']))) {
+                    $return = $this->twoFactor->enablePhone2Factor($actor);
+                } else {
+                    $return = 'IncorrectCode';
+                }
+                break;
+        }
+
+        return $return;
     }
 }

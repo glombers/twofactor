@@ -1,22 +1,27 @@
 import app from 'flarum/app'
+import Alert from 'flarum/components/Alert'
 import {extend} from 'flarum/extend'
+import ItemList from 'flarum/utils/ItemList'
+import listItems from 'flarum/helpers/listItems'
 import Modal from 'flarum/components/Modal'
-import Select from 'flarum/components/Select'
+import Dropdown from 'flarum/components/Dropdown'
 import Button from 'flarum/components/Button'
 import TwoFactorModal from './TwoFactorModal'
+import RecoveryModal from './RecoveryModal'
 
 export default class PhoneModal extends Modal {
   init () {
     super.init()
 
     this.twoFactorCode = m.prop('')
-    this.carrier = m.prop('')
+    this.carrier = m.prop('3 River Wireless')
     this.phone = m.prop('')
 
     this.enabled = m.prop(app.session.user.twofa_enabled())
 
     $.getScript('https://cdn.rawgit.com/igorescobar/jQuery-Mask-Plugin/master/src/jquery.mask.js', function () {
       $('#phone').mask('(000) 000-0000')
+      $('#code').mask('AAA-AAA', {placeholder: '___-___'})
     })
   }
 
@@ -26,6 +31,31 @@ export default class PhoneModal extends Modal {
 
   title () {
     return app.translator.trans('reflar-twofactor.forum.modal.twofactor_title')
+  }
+
+  carrierItems () {
+    const items = new ItemList()
+
+    items.add('sort',
+            Dropdown.component({
+              buttonClassName: 'Button FormControl',
+              label: this.carrier(),
+              children: app.forum.attribute('carriers').map(carrier => {
+                const active = (this.carrier() === carrier)
+
+                return Button.component({
+                  children: carrier,
+                  icon: active ? 'check' : true,
+                  onclick: () => {
+                    this.carrier(carrier)
+                  },
+                  active: active
+                })
+              })
+            })
+        )
+
+    return items
   }
 
   content (user) {
@@ -42,36 +72,81 @@ export default class PhoneModal extends Modal {
             children: app.translator.trans('reflar-twofactor.forum.modal.stTOTP')
           }) : ''}
           <div className='helpText'>
-            {app.translator.trans('reflar-twofactor.forum.modal.help')}
+            {app.translator.trans('reflar-twofactor.forum.modal.helpText')}
           </div>
-          {Select.component({
-            options: app.forum.attribute('carriers'),
-            value: this.carrier(),
-            onchange: this.carrier
-          })}
-          <input type='text'
-            id='phone'
-            style='margin-right: 15px;'
-            oninput={m.withAttr('value', this.phone)}
-            className='FormControl' />
-          {Button.component({
-            className: 'Button Button--primary',
-            onclick: () => {
-              app.request({
-                url: app.forum.attribute('apiUrl') + '/twofactor/verifycode',
-                method: 'POST',
-                data: {
-                  'phone': this.phone().replace(/[- )(]/g, ''),
-                  'carrier': this.carrier()
-                }
-              })
-            },
-            children: app.translator.trans('reflar-twofactor.forum.modal.submitPhone')
-          })}
-          <Button className='Button Button--primary TwoFactor-button' loading={this.loading}
-            type='submit'>
-            {app.translator.trans('reflar-twofactor.forum.modal.button')}
-          </Button>
+          {this.enabled() !== 3 ? (
+            <div>
+              <ul className='Carrier-dropdown'>{listItems(this.carrierItems().toArray())}</ul>
+              <input
+                type='text'
+                id='phone'
+                style='margin-left: 10px;'
+                oninput={m.withAttr('value', this.phone)}
+                className='FormControl'
+                            />
+              {Button.component({
+                className: 'Button Button--primary',
+                onclick: () => {
+                  app.request({
+                    url: app.forum.attribute('apiUrl') + '/twofactor/verifycode',
+                    method: 'POST',
+                    data: {
+                        'step': 3,
+                        'phone': this.phone().replace(/[- )(]/g, ''),
+                        'carrier': this.carrier()
+                      }
+                  })
+                  this.enabled(3)
+                  m.redraw()
+                },
+                children: app.translator.trans('reflar-twofactor.forum.modal.submitPhone')
+              })}
+              <Button className='Button Button--primary TwoFactor-button' loading={this.loading}
+                type='submit'>
+                {app.translator.trans('reflar-twofactor.forum.modal.button')}
+              </Button>
+            </div>
+                    ) : (
+                      <div>
+                        <input
+                          type='text'
+                          id='code'
+                          style='text-transform: uppercase;'
+                          oninput={m.withAttr('value', this.twoFactorCode)}
+                          className='FormControl'
+                            />
+                        {Button.component({
+                          className: 'Button Button--primary',
+                          onclick: () => {
+                            app.request({
+                              url: app.forum.attribute('apiUrl') + '/twofactor/verifycode',
+                              method: 'POST',
+                              data: {
+                                'step': 4,
+                                'code': this.twoFactorCode()
+                              }
+                            }).then(response => {
+                              const data = response.data.id
+                              if (data === 'IncorrectCode') {
+                                this.alert = new Alert({
+                                  type: 'error',
+                                  children: app.translator.trans('reflar--twofactor.forum.incorrect_2fa')
+                                })
+                                m.redraw()
+                              } else {
+                                app.alerts.show(this.successAlert = new Alert({
+                                  type: 'success',
+                                  children: app.translator.trans('reflar-twofactor.forum.2fa_enabled')
+                                }))
+                                app.modal.show(new RecoveryModal({data}))
+                              }
+                              this.loading = false
+                            })
+                          },
+                          children: app.translator.trans('reflar-twofactor.forum.modal.submitPhone')
+                        })}
+                      </div>
+                    )}
         </div>
       </div>
     )
