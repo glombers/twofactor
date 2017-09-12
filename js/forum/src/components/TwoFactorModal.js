@@ -4,7 +4,8 @@ import {extend} from 'flarum/extend'
 import Modal from 'flarum/components/Modal'
 import Switch from 'flarum/components/Switch'
 import Button from 'flarum/components/Button'
-import PhoneModal from 'Reflar/twofactor/components/PhoneModal'
+import PhoneModal from './PhoneModal'
+import RecoveryModal from './RecoveryModal'
 
 export default class TwoFactorModal extends Modal {
   init () {
@@ -18,6 +19,10 @@ export default class TwoFactorModal extends Modal {
     this.url = m.prop('')
 
     this.twoFactorCode = m.prop('')
+
+    $.getScript('https://cdn.rawgit.com/igorescobar/jQuery-Mask-Plugin/master/src/jquery.mask.js', function () {
+      $('#passcode').mask('000000')
+    })
 
     app.request({
       url: app.forum.attribute('apiUrl') + '/twofactor/getsecret',
@@ -54,15 +59,16 @@ export default class TwoFactorModal extends Modal {
                 },
                 children: app.translator.trans('reflar-twofactor.forum.modal.stPhone')
               })}
-              <div className='helpText'>
+              <div style='text-align: center' className='helpText Submit-Button'>
                 {app.translator.trans('reflar-twofactor.forum.modal.helpQR')}
               </div>
-              <div className='TwoFactor-img'>
+              <div className='TwoFactor-img Submit-Button'>
                 <img src={decodeURIComponent(this.url())} />
                 <h3>{this.secret()}</h3>
               </div>
               <div className='TwoFactor-input'>
                 <input type='text'
+                  id='passcode'
                   oninput={m.withAttr('value', this.twoFactorCode)}
                   className='FormControl'
                   placeholder={app.translator.trans('reflar-twofactor.forum.modal.placeholder')} />
@@ -116,28 +122,33 @@ export default class TwoFactorModal extends Modal {
 
     this.loading = true
 
+    this.alert = null
+
     app.request({
       url: app.forum.attribute('apiUrl') + '/twofactor/verifycode',
       method: 'POST',
-      data: {'twofactor': this.twoFactorCode()},
+      data: {
+        'step': 2,
+        'code': this.twoFactorCode()
+      },
       errorHandler: this.onerror.bind(this)
-    }).then(this.success.bind(this))
+    }).then(response => {
+      const data = response.data.id
+      if (data === 'IncorrectCode') {
+        this.alert = new Alert({
+          type: 'error',
+          children: app.translator.trans('reflar-twofactor.forum.incorrect_2fa')
+        })
+        m.redraw()
+      } else {
+        app.alerts.show(this.successAlert = new Alert({
+          type: 'success',
+          children: app.translator.trans('reflar-twofactor.forum.2fa_enabled')
+        }))
+        app.modal.show(new RecoveryModal({data}))
+      }
+    })
+
     this.loading = false
-  }
-
-  success (response) {
-    app.alerts.show(this.successAlert = new Alert({
-      type: 'success',
-      children: app.translator.trans('reflar-twofactor.forum.2fa_enabled')
-    }))
-    app.modal.show(new RecoveryModal())
-  }
-
-  onerror (error) {
-    if (error.status === 500) {
-      error.alert.props.children = app.translator.trans('reflar-twofactor.forum.incorrect_2fa')
-    }
-
-    super.onerror(error)
   }
 }

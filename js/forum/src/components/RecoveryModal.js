@@ -14,8 +14,6 @@ export default class RecoveryModal extends Modal {
     super.init()
 
     this.recoveries = this.props.data.split(',')
-
-    console.log(this.recoveries)
   }
 
   className () {

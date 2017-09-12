@@ -59,9 +59,12 @@ class VerifyCodeController extends AbstractResourceController
                 $actor->save();
                 break;
             case 2:
-                $actor->twofa_enabled = 1;
-                $actor->save();
-                // no break
+                if ($this->twoFactor->verifyTOTPCode($actor, strtoupper($data['code']))) {
+                    $return = $this->twoFactor->enableTOTP2Factor($actor);
+                } else {
+                    $return = 'IncorrectCode';
+                }
+                break;
             case 3:
                 $carrier = Carrier::where('identifier', $data['carrier'])->firstOrFail();
                 $actor->carrier = $carrier->email;

@@ -64,15 +64,29 @@ class TwoFactor
 
     public function enableTOTP2Factor($user)
     {
-        $user->twofa_enabled = 1;
+        $user->twofa_enabled = 2;
+        $recoveryCodes = $this->generateRecoveryCodes();
+
+        $codes = explode(',', $recoveryCodes);
+
+        foreach ($codes as &$code) {
+            $code = $this->hasher->make($code);
+        }
+
+        $user->recovery_codes = implode(',', $codes);
+
         $user->save();
+
+        return $recoveryCodes;
     }
 
     public function disable2Factor($user)
     {
         $user->google2fa_secret = '';
         $user->twofa_enabled = 0;
-        $user->recovery_codes = null;
+        $user->recovery_codes = '';
+        $user->phone = '';
+        $user->carrier = '';
         $user->save();
     }
 
@@ -166,12 +180,17 @@ class TwoFactor
 
     public function verifyTOTPCode($user, $input)
     {
-        return $this->google2fa->verifyKey($user->google2fa_secret, $input);
+        if ($this->google2fa->verifyKey($user->google2fa_secret, $input)) {
+            $return = true;
+        } else {
+            $return = $this->doRecovery($input, $user);
+        }
+
+        return $return;
     }
 
     public function verifyPhoneCode($user, $input)
     {
-        $return = false;
         if ($this->hasher->check($input, $user->text_code)) {
             $return = true;
         } else {

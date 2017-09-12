@@ -41,7 +41,7 @@ class TokenController implements ControllerInterface
     /**
      * @var TwoFactor
      */
-    private $twoFactor;
+    protected $twoFactor;
 
     /**
      * @param UserRepository  $users
@@ -69,37 +69,45 @@ class TokenController implements ControllerInterface
         $lifetime = array_get($body, 'lifetime', 3600);
         $twofactor = array_get($body, 'twofactor');
 
-        if ($twofactor == null) {
+        if (!$twofactor) {
             $twofactor = '0';
         }
 
         $user = $this->users->findByIdentification($identification);
+
         if (!$user || !$user->checkPassword($password)) {
             throw new PermissionDeniedException();
         }
 
-        if ($user->twofa_enabled == 1) {
-            if ($this->twoFactor->verifyCode($user, $twofactor) == true || $this->twoFactor->doRecovery($twofactor, $user) == true) {
-                $token = AccessToken::generate($user->id, $lifetime);
-                $token->save();
-
+        if ($user->twofa_enabled === 2) {
+            if ($this->twoFactor->verifyTOTPCode($user, $twofactor)) {
+                return $this->generateAccessCode($user, $lifetime);
+            } else {
                 return new JsonResponse([
-                    'token' => $token->id,
-                    'userId' => $user->id,
+                    'code' => '404',
                 ]);
+            }
+        } elseif ($user->twofa_enabled === 4) {
+            if ($this->twoFactor->verifyPhoneCode($user, $twofactor)) {
+                return $this->generateAccessCode($user, $lifetime);
             } else {
                 return new JsonResponse([
                     'code' => '404',
                 ]);
             }
         } else {
-            $token = AccessToken::generate($user->id, $lifetime);
-            $token->save();
-
-            return new JsonResponse([
-                'token' => $token->id,
-                'userId' => $user->id,
-            ]);
+            return $this->generateAccessCode($user, $lifetime);
         }
+    }
+
+    protected function generateAccessCode($user, $lifetime)
+    {
+        $token = AccessToken::generate($user->id, $lifetime);
+        $token->save();
+
+        return new JsonResponse([
+            'token' => $token->id,
+            'userId' => $user->id,
+        ]);
     }
 }
