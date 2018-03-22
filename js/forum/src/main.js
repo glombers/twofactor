@@ -104,30 +104,36 @@ app.initializers.add('reflar-twofactor', () => {
     app.request({
       url: app.forum.attribute('apiUrl') + '/twofactor/login',
       method: 'POST',
-      data: {identification, password, remember},
-      errorHandler: this.failure.bind(this)
-    }).then(
-            () => window.location.reload(),
-            this.loaded.bind(this)
-        )
-  }
-  LogInModal.prototype.failure = function (response, identification, password, remember) {
-    if (response.status === 401) {
-      app.alerts.show(this.successAlert = new Alert({
-        type: 'error',
-        children: app.translator.trans('core.forum.log_in.invalid_login_message')
-      }))
-      this.loading = false
-    }
-    if (response.status === 405) {
+	  errorHandler: this.failure.bind(this),
+      data: {identification, password, remember}
+    }).then((response, identification, password, remember) => {
+		console.log(response)
+	if (response === null) {
       var data = {
         identification: this.identification(),
         password: this.password(),
         remember: this.remember()
       }
       app.modal.show(new LogInFactorModal({data}))
-    }
+    } 	 else {
+		window.location.reload()
+		}
+			}	
+        )
   }
+  
+  LogInModal.prototype.failure = function(response, identification, password, remember) {
+  if (response.status == 401) {
+     app.alerts.show(this.successAlert = new Alert({
+      type: 'error',
+      children: app.translator.trans('core.forum.log_in.invalid_login_message')
+       }));
+    this.loading = false
+	m.redraw()
+  }
+}
+
+
 
   extend(SettingsPage.prototype, 'accountItems', (items) => {
     items.add('2 Factor',

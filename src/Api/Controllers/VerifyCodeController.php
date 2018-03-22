@@ -59,7 +59,7 @@ class VerifyCodeController extends AbstractResourceController
                 $actor->save();
                 break;
             case 2:
-                if ($this->twoFactor->verifyTOTPCode($actor, strtoupper($data['code']))) {
+                if ($this->twoFactor->verifyTOTPCode($actor, $data['code'])) {
                     $return = $this->twoFactor->enableTOTP2Factor($actor);
                 } else {
                     $return = 'IncorrectCode';

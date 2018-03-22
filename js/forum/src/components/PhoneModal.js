@@ -136,7 +136,7 @@ export default class PhoneModal extends Modal {
       url: app.forum.attribute('apiUrl') + '/twofactor/verifycode',
       method: 'POST',
       data: {
-        'step': 2,
+        'step': 4,
         'code': this.twoFactorCode()
       },
       errorHandler: this.onerror.bind(this)

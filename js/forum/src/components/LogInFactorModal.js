@@ -7,8 +7,6 @@ import Switch from 'flarum/components/Switch'
 import Button from 'flarum/components/Button'
 import User from 'flarum/models/User'
 
-import GetVars from 'Reflar/twofactor/components/GetVars'
-
 export default class LogInFactorModal extends Modal {
   init () {
     super.init()
