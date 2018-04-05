@@ -19,8 +19,6 @@ use Illuminate\Contracts\Bus\Dispatcher as BusDispatcher;
 use Illuminate\Contracts\Events\Dispatcher as EventDispatcher;
 use Psr\Http\Message\ServerRequestInterface;
 use Reflar\twofactor\TwoFactor;
-use Reflar\twofactor\Exceptions\IncorrectTwoFactorException;
-use Zend\Diactoros\Response\EmptyResponse;
 use Zend\Diactoros\Response\JsonResponse;
 
 class TokenController implements ControllerInterface
@@ -81,19 +79,18 @@ class TokenController implements ControllerInterface
             throw new PermissionDeniedException();
         }
 
-        if ($user->twofa_enabled === 2) {
+        if (2 === $user->twofa_enabled) {
             if ($this->twoFactor->verifyTOTPCode($user, $twofactor)) {
                 return $this->generateAccessCode($user, $lifetime);
             } else {
-                return new emptyResponse();
-
+                return 'IncorrectCode';
             }
-        } elseif ($user->twofa_enabled === 4) {
+        } elseif (4 === $user->twofa_enabled) {
             if ($this->twoFactor->verifyPhoneCode($user, $twofactor)) {
                 return $this->generateAccessCode($user, $lifetime);
             } else {
                 // $this->twoFactor->sendText($user);
-                throw new IncorrectTwoFactorException();
+                return 'IncorrectCode';
             }
         } else {
             return $this->generateAccessCode($user, $lifetime);

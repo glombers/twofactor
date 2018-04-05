@@ -1,13 +1,7 @@
 import app from 'flarum/app'
-import Alert from 'flarum/components/Alert'
 import { extend } from 'flarum/extend'
 import Modal from 'flarum/components/Modal'
-import Model from 'flarum/Model'
-import Switch from 'flarum/components/Switch'
 import Button from 'flarum/components/Button'
-import User from 'flarum/models/User'
-
-import GetVars from 'issyrocks12/twofactor/components/GetVars'
 
 export default class RecoveryModal extends Modal {
   init () {

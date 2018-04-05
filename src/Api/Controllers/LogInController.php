@@ -70,19 +70,21 @@ class LogInController implements ControllerInterface
         $params = array_only($body, ['identification', 'password', 'twofactor']);
 
         $response = $this->apiClient->send(TokenController::class, $actor, [], $params);
-		
-			if ($response->getStatusCode() === 200) {
-				$data = json_decode($response->getBody());
 
-				$session = $request->getAttribute('session');
-				$this->authenticator->logIn($session, $data->userId);
+        if ('IncorrectCode' !== $response) {
+            if (200 === $response->getStatusCode()) {
+                $data = json_decode($response->getBody());
 
-				$token = AccessToken::find($data->token);
+                $session = $request->getAttribute('session');
+                $this->authenticator->logIn($session, $data->userId);
 
-				event(new UserLoggedIn($this->users->findOrFail($data->userId), $token));
+                $token = AccessToken::find($data->token);
 
-				$response = $this->rememberer->remember($response, $token, !array_get($body, 'remember'));
-			}
+                event(new UserLoggedIn($this->users->findOrFail($data->userId), $token));
+
+                $response = $this->rememberer->remember($response, $token, !array_get($body, 'remember'));
+            }
+        }
 
         return $response;
     }

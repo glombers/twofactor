@@ -1,6 +1,6 @@
 reflar-twofactor:
   forum:
-    text: "Your verification code is string"
+    text: "Your {forum} verification code is: {code}"
     accountlabel: Two Factor
     incorrect_2fa: Invalid verification code
     2fa_disabled: Two factor authentication successfully disabled.
@@ -23,3 +23,11 @@ reflar-twofactor:
       recov_help2: These are your only way back into your account if you lose access to your phone or TOTP app.
       stPhone: Switch to phone setup
       stTOTP: Switch to TOTP setup
+  admin:
+      settings:
+        title: TwoFactor Settings
+        help: Get your Account SID and Auth Token from twilio.com/console, as well as your phone number from twilio.com/console/phone-numbers/incoming
+        enable: Enable Twillio
+        sid: Twillio Account SID
+        token: Twillio Auth Token
+        number: Twillio Phone Number

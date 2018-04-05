@@ -14,7 +14,6 @@ namespace Reflar\twofactor\Api\Controllers;
 
 use Flarum\Api\Controller\AbstractResourceController;
 use Psr\Http\Message\ServerRequestInterface;
-use Reflar\twofactor\Carrier;
 use Reflar\twofactor\TwoFactor;
 use Tobscure\JsonApi\Document;
 
@@ -66,9 +65,6 @@ class VerifyCodeController extends AbstractResourceController
                 }
                 break;
             case 3:
-                $carrier = Carrier::where('identifier', $data['carrier'])->firstOrFail();
-                $actor->carrier = $carrier->email;
-
                 $this->twoFactor->preparePhone2Factor($actor, $data['phone']);
                 break;
             case 4:

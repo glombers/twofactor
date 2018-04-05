@@ -3,11 +3,11 @@
 namespace Reflar\twofactor;
 
 use Flarum\Settings\SettingsRepositoryInterface;
-use PragmaRX\Google2FA\Google2FA;
 use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Contracts\Mail\Mailer;
-use Illuminate\Mail\Message;
+use PragmaRX\Google2FA\Google2FA;
 use Symfony\Component\Translation\TranslatorInterface;
+use Twilio\Rest\Client as Client;
 
 class TwoFactor
 {
@@ -45,8 +45,13 @@ class TwoFactor
      * @param Mailer                      $mailer
      * @param TranslatorInterface         $translator
      */
-    public function __construct(SettingsRepositoryInterface $settings, Google2FA $google2fa, Hasher $hasher, Mailer $mailer, TranslatorInterface $translator)
-    {
+    public function __construct(
+        SettingsRepositoryInterface $settings,
+        Google2FA $google2fa,
+        Hasher $hasher,
+        Mailer $mailer,
+        TranslatorInterface $translator
+    ) {
         $this->google2fa = $google2fa;
         $this->settings = $settings;
         $this->hasher = $hasher;
@@ -103,12 +108,45 @@ class TwoFactor
     {
         $randst = '';
         $chars = [
-            '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
-            'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+            '1',
+            '2',
+            '3',
+            '4',
+            '5',
+            '6',
+            '7',
+            '8',
+            '9',
+            'A',
+            'B',
+            'C',
+            'D',
+            'E',
+            'F',
+            'G',
+            'H',
+            'I',
+            'J',
+            'K',
+            'L',
+            'M',
+            'N',
+            'O',
+            'P',
+            'Q',
+            'R',
+            'S',
+            'T',
+            'U',
+            'V',
+            'W',
+            'X',
+            'Y',
+            'Z',
         ];
         for ($rand = 0; $rand < 7; ++$rand) {
             $random = rand(0, count($chars) - 1);
-            if ($rand == 3) {
+            if (3 == $rand) {
                 $randst .= '-';
             } else {
                 $randst .= $chars[$random];
@@ -123,7 +161,7 @@ class TwoFactor
         $randstr = '';
         for ($i = 0; $i < 3; ++$i) {
             $randstr .= $this->generateRandom6String();
-            if ($i !== 2) {
+            if (2 !== $i) {
                 $randstr .= ',';
             }
         }
@@ -202,11 +240,23 @@ class TwoFactor
 
     public function sendText($user)
     {
+        $sid = $this->settings->get('reflar.twofactor.twillio_sid');
+        $token = $this->settings->get('reflar.twofactor.twillio_token');
+        $client = new Client($sid, $token);
+
         $randst = $this->generateRandom6String();
         $user->text_code = $this->hasher->make($randst);
 
-        $this->mailer->raw($this->translator->trans('reflar-twofactor.forum.text', ['string' => $randst]), function (Message $message) use ($user) {
-            $message->to($user->phone.'@'.$user->carrier);
-        });
+        $client->messages->create($user->phone, array(
+            'from' => $this->settings->get('reflar.twofactor.twillio_number'),
+            'body' => $this->translator->trans('reflar-twofactor.forum.text', [
+                    '{forum}' => $this->settings->get('forum_title'),
+                    '{code}' => $randst,
+                ]),
+        ));
+    }
+
+    public function notifyEnabled($user)
+    {
     }
 }

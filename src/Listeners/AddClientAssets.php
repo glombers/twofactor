@@ -26,7 +26,13 @@ class AddClientAssets
         if ($event->isForum()) {
             $event->addAssets([
                 __DIR__.'/../../js/forum/dist/extension.js',
-                __DIR__.'/../../less/forums/TwoFactor.less',
+                __DIR__.'/../../less/forum/TwoFactor.less',
+            ]);
+            $event->addBootstrapper('Reflar/twofactor/main');
+        }
+        if ($event->isAdmin()) {
+            $event->addAssets([
+                __DIR__.'/../../js/admin/dist/extension.js',
             ]);
             $event->addBootstrapper('Reflar/twofactor/main');
         }

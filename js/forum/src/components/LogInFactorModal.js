@@ -2,10 +2,7 @@ import app from 'flarum/app'
 import Alert from 'flarum/components/Alert'
 import { extend } from 'flarum/extend'
 import Modal from 'flarum/components/Modal'
-import Model from 'flarum/Model'
-import Switch from 'flarum/components/Switch'
 import Button from 'flarum/components/Button'
-import User from 'flarum/models/User'
 
 export default class LogInFactorModal extends Modal {
   init () {
@@ -56,26 +53,25 @@ export default class LogInFactorModal extends Modal {
     this.loading = true
 
     app.request({
-      url: app.forum.attribute('apiUrl') + '/Reflar/twofactor/login',
+      url: app.forum.attribute('apiUrl') + '/twofactor/login',
       method: 'POST',
       data: {
         'identification': this.identification,
         'password': this.password,
         'remember': this.remember,
-        'twofactor': this.twoFactorCode()},
-      errorHandler: this.onerror.bind(this)
-    }).then(
-        () => window.location.reload(),
-        this.loaded.bind(this)
-      )
-  }
-
-  onerror (error) {
-    if (error.status === 404) {
-      error.alert.props.children = app.translator.trans('reflar-twofactor.forum.incorrect_2fa')
-      this.loading = false
-    }
-
-    super.onerror(error)
+        'twofactor': this.twoFactorCode()
+      }
+    }).then(response => {
+        if (response === null) {
+            this.alert = new Alert({
+                type: 'error',
+                children: app.translator.trans('reflar-twofactor.forum.incorrect_2fa')
+            })
+            this.loading = false
+            m.redraw()
+        } else {
+            window.location.reload()
+        }
+    })
   }
 }
