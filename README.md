@@ -2,18 +2,19 @@
 
 [![GitLab license](https://img.shields.io/badge/license-MIT-blue.svg)](https://gitlab.com/ReDevelopers/ReFlar/twofactor/blob/master/LICENSE) [![Latest Stable Version](https://img.shields.io/packagist/v/reflar/twofactor.svg)](https://gitlab.com/ReDevelopers/ReFlar/twofactor/)
 
+
+#### Importing from the old twofactor
+
+- Simply install this, everything will be transfered to the new extension automatically
+
 ##### Please read the install guide!
 
-A [Flarum](http://flarum.org) extension that increases security by adding TOTP two factor authentication
-
-### Goals
-
-- To increase forum security
+A [Flarum](http://flarum.org) extension that increases security by adding TOTP and Twillio two factor authentication
 
 ### Usage
 
 - As a user, go to your account settings page and follow the prompts to setup twofactor
-- No admin options to configure
+- Admins have the option to link their Twillio account to allow users to recieve codes via text
 
 ### Installation
 
@@ -57,5 +58,5 @@ A: This extension uses a custom login handler and therefore a different url to s
 
 ### Links
 
-- [on GitLab](https://gitlab.com/ReDevelopers/ReFlar/twofactor)
-- [Issues](https://gitlab.com/ReDevelopers/ReFlar/twofactor/issues)
+- [on Github](https://github.com/ReFlar/twofactor)
+- [Issues](https://github.com/ReFlar/twofactor/issues)
