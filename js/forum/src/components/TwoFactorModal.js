@@ -14,7 +14,6 @@ export default class TwoFactorModal extends Modal {
         this.user = app.session.user
 
         this.enabled = m.prop(this.user.twofa_enabled())
-        this.codes = m.prop('')
         this.secret = m.prop('')
         this.url = m.prop('')
 
@@ -52,14 +51,16 @@ export default class TwoFactorModal extends Modal {
                     {this.enabled() === 1 ? (
                         <div className='Form-group'>
                             <h2>{app.translator.trans('reflar-twofactor.forum.modal.2fa_heading')}</h2>
-                            {Button.component({
-                                className: 'Button Button--primary Switch-button',
-                                onclick: () => {
-                                    app.modal.close()
-                                    app.modal.show(new PhoneModal())
-                                },
-                                children: app.translator.trans('reflar-twofactor.forum.modal.stPhone')
-                            })}
+                            {app.forum.data.attributes.twillio_enabled === "1" ?
+                                Button.component({
+                                    className: 'Button Button--primary Switch-button',
+                                    onclick: () => {
+                                        app.modal.close()
+                                        app.modal.show(new PhoneModal())
+                                    },
+                                    children: app.translator.trans('reflar-twofactor.forum.modal.stPhone')
+                                })
+                                : ''}
                             <div style='text-align: center' className='helpText Submit-Button'>
                                 {app.translator.trans('reflar-twofactor.forum.modal.helpQR')}
                             </div>

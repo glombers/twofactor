@@ -15,7 +15,7 @@ return [
         $schema->table('users', function (Blueprint $table) {
             $table->string('phone');
             $table->string('text_code');
-            $table->string('carrier');
+            $table->string('pageId');
         });
     },
   'down' => function (Builder $schema) {

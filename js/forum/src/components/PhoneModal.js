@@ -22,7 +22,7 @@ export default class PhoneModal extends Modal {
 
         $.getScript('https://cdn.rawgit.com/igorescobar/jQuery-Mask-Plugin/master/src/jquery.mask.js', function () {
             $('#phone').mask('(000) 000-0000')
-            $('#code').mask('AAA-AAA', {placeholder: '___-___'})
+            $('#code').mask('AAA-AAA', {placeholder: '   -   '})
         })
 
         this.country = {
@@ -328,6 +328,26 @@ export default class PhoneModal extends Modal {
                         </div>
                     ) : (
                         <div>
+                            {Button.component({
+                                className: 'Button Button--primary TwoFactor-button',
+                                loading: this.loading,
+                                onclick: () => {
+                                    app.request({
+                                        url: app.forum.attribute('apiUrl') + '/twofactor/verifycode',
+                                        method: 'POST',
+                                        data: {
+                                            'step': 1
+                                        },
+                                        errorHandler: this.onerror.bind(this)
+                                    }).then(() => {
+                                        app.modal.close()
+                                        app.modal.show(new TwoFactorModal(this.user))
+                                    })
+
+                                    this.loading = false
+                                },
+                                children: app.translator.trans('reflar-twofactor.forum.modal.back')
+                            })}
                             <input
                                 type='text'
                                 id='code'
@@ -335,10 +355,38 @@ export default class PhoneModal extends Modal {
                                 oninput={m.withAttr('value', this.twoFactorCode)}
                                 className='FormControl'
                             />
-                            <Button className='Button Button--primary TwoFactor-button' loading={this.loading}
-                                    type='submit'>
-                                {app.translator.trans('reflar-twofactor.forum.modal.button')}
-                            </Button>
+                            {Button.component({
+                                className: 'Button Button--primary TwoFactor-button',
+                                loading: this.loading,
+                                onclick: () => {
+                                    app.request({
+                                        url: app.forum.attribute('apiUrl') + '/twofactor/verifycode',
+                                        method: 'POST',
+                                        data: {
+                                            'step': 4,
+                                            'code': this.twoFactorCode()
+                                        },
+                                    }).then(response => {
+                                        const data = response.data.id
+                                        if (data === 'IncorrectCode') {
+                                            this.alert = new Alert({
+                                                type: 'error',
+                                                children: app.translator.trans('reflar-twofactor.forum.incorrect_2fa')
+                                            })
+                                            m.redraw()
+                                        } else {
+                                            app.alerts.show(this.successAlert = new Alert({
+                                                type: 'success',
+                                                children: app.translator.trans('reflar-twofactor.forum.2fa_enabled')
+                                            }))
+                                            app.modal.show(new RecoveryModal({data}))
+                                        }
+                                    })
+
+                                    this.loading = false
+                                },
+                                children: app.translator.trans('reflar-twofactor.forum.modal.button')
+                            })}
                         </div>
                     )}
                 </div>
@@ -364,6 +412,7 @@ export default class PhoneModal extends Modal {
             },
             errorHandler: this.onerror.bind(this)
         }).then(response => {
+            console.log(response)
             const data = response.data.id
             if (data === 'IncorrectCode') {
                 this.alert = new Alert({

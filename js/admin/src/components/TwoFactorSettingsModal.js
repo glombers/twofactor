@@ -10,6 +10,12 @@ export default class TwoFactorSettingsModal extends SettingsModal {
         return app.translator.trans('reflar-twofactor.admin.settings.title');
     }
 
+    config() {
+        $.getScript('https://cdn.rawgit.com/igorescobar/jQuery-Mask-Plugin/master/src/jquery.mask.js', function () {
+            $('#phone').mask('+0 (000) 000-0000')
+        })
+    }
+
     form() {
         return [
             <div className="Form-group">
@@ -36,7 +42,7 @@ export default class TwoFactorSettingsModal extends SettingsModal {
 
             <div className="Form-group">
                 <label>{app.translator.trans('reflar-twofactor.admin.settings.number')}</label>
-                <input className="FormControl" bidi={this.setting('reflar.twofactor.twillio_number')}/>
+                <input id="phone" className="FormControl" placeholder="+1 (123) 456-7890" bidi={this.setting('reflar.twofactor.twillio_number')}/>
             </div>
         ];
     }

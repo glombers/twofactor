@@ -30,6 +30,13 @@ System.register('Reflar/twofactor/components/TwoFactorSettingsModal', ['flarum/c
                         return app.translator.trans('reflar-twofactor.admin.settings.title');
                     }
                 }, {
+                    key: 'config',
+                    value: function config() {
+                        $.getScript('https://cdn.rawgit.com/igorescobar/jQuery-Mask-Plugin/master/src/jquery.mask.js', function () {
+                            $('#phone').mask('+0 (000) 000-0000');
+                        });
+                    }
+                }, {
                     key: 'form',
                     value: function form() {
                         return [m(
@@ -70,7 +77,7 @@ System.register('Reflar/twofactor/components/TwoFactorSettingsModal', ['flarum/c
                                 null,
                                 app.translator.trans('reflar-twofactor.admin.settings.number')
                             ),
-                            m('input', { className: 'FormControl', bidi: this.setting('reflar.twofactor.twillio_number') })
+                            m('input', { id: 'phone', className: 'FormControl', placeholder: '+1 (123) 456-7890', bidi: this.setting('reflar.twofactor.twillio_number') })
                         )];
                     }
                 }]);

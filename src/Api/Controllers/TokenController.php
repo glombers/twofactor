@@ -68,6 +68,7 @@ class TokenController implements ControllerInterface
         $password = array_get($body, 'password');
         $lifetime = array_get($body, 'lifetime', 3600);
         $twofactor = array_get($body, 'twofactor');
+        $pageId = array_get($body, 'pageId');
 
         if (!$twofactor) {
             $twofactor = '0';
@@ -89,8 +90,12 @@ class TokenController implements ControllerInterface
             if ($this->twoFactor->verifyPhoneCode($user, $twofactor)) {
                 return $this->generateAccessCode($user, $lifetime);
             } else {
-                // $this->twoFactor->sendText($user);
+                if ($user->pageId !== $pageId) {
+                    $user->pageId = $pageId;
+                    $this->twoFactor->sendText($user);
+                }
                 return 'IncorrectCode';
+
             }
         } else {
             return $this->generateAccessCode($user, $lifetime);

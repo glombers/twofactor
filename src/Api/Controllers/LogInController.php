@@ -67,7 +67,7 @@ class LogInController implements ControllerInterface
     {
         $actor = $request->getAttribute('actor');
         $body = $request->getParsedBody();
-        $params = array_only($body, ['identification', 'password', 'twofactor']);
+        $params = array_only($body, ['identification', 'password', 'twofactor', 'pageId']);
 
         $response = $this->apiClient->send(TokenController::class, $actor, [], $params);
 

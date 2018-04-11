@@ -125,10 +125,8 @@ class TwoFactor
             'F',
             'G',
             'H',
-            'I',
             'J',
             'K',
-            'L',
             'M',
             'N',
             'O',
@@ -218,7 +216,7 @@ class TwoFactor
 
     public function verifyTOTPCode($user, $input)
     {
-        if ($this->google2fa->verifyKey($user->google2fa_secret, $input)) {
+        if ($this->google2fa->verifyKey($user->google2fa_secret, str_replace('-', '', $input))) {
             $return = true;
         } else {
             $return = $this->doRecovery($input, $user);
@@ -246,6 +244,8 @@ class TwoFactor
 
         $randst = $this->generateRandom6String();
         $user->text_code = $this->hasher->make($randst);
+
+        $user->save();
 
         $client->messages->create($user->phone, array(
             'from' => $this->settings->get('reflar.twofactor.twillio_number'),

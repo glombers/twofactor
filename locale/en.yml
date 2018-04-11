@@ -15,7 +15,7 @@ reflar-twofactor:
       submitPhone: Save Phone
       placeholder: One time passcode
       button: Submit
-      2fa_help: Type in the one time passcode from your TOTP app.
+      2fa_help: Type in your SMS or TOTP one-time code.
       close: I have saved my codes
       recov: Recovery Codes
       login_title: Two Factor Authentication
@@ -23,6 +23,7 @@ reflar-twofactor:
       recov_help2: These are your only way back into your account if you lose access to your phone or TOTP app.
       stPhone: Switch to phone setup
       stTOTP: Switch to TOTP setup
+      back: Back
   admin:
       settings:
         title: TwoFactor Settings

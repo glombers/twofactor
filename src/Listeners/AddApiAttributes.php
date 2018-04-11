@@ -2,6 +2,8 @@
 
 namespace Reflar\twofactor\Listeners;
 
+use Flarum\Api\Serializer\ForumSerializer;
+use Flarum\Api\Serializer\UserSerializer;
 use Flarum\Event\ConfigureApiRoutes;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -13,7 +15,7 @@ class AddApiAttributes
     /**
      * @param SettingsRepositoryInterface $settings
      */
-    public function __consturct(SettingsRepositoryInterface $settings)
+    public function __construct(SettingsRepositoryInterface $settings)
     {
         $this->settings = $settings;
     }
