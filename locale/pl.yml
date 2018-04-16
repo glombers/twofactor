@@ -1,0 +1,34 @@
+reflar-twofactor:
+  forum:
+    text: "Twój kod weryfikacyjny {forum} to: {code}"
+    accountlabel: Uwierzytelnianie
+    incorrect_2fa: Nieprawidłowy kod weryfikacyjny
+    2fa_disabled: Uwierzytelnianie dwuetapowe zostało wyłączone.
+    2fa_enabled: Uwierzytelnianie dwuetapowe zostało włączone.
+    modal:
+      twofactor_title: Konfiguracja Uwierzytelniania
+      heading: Ustawienia Uwierzytelnianie
+      switch: Uwierzytelnianie
+      2fa_heading: Kod Uwierzytelniania
+      helpQR: Zeskanuj kod QR lub ręcznie dodaj kod do Google Authenticator lub innej aplikacji.
+      helpPhone: 'Wybierz operatora, wprowadź swój numer telefonu, a następnie kliknij "Zapisz telefon"'
+      submitPhone: Zapisz telefon
+      placeholder: Hasło jednorazowe
+      button: Zatwierdź
+      2fa_help: Wpisz swój SMS lub jednorazowy kod TOTP.
+      close: Zapisałem moje kody
+      recov: Kody odzyskiwania
+      login_title: Uwierzytelnianie.
+      recov_help1: Zapisz te kody, nie będą one wyświetlane ponownie!
+      recov_help2: Są one jedyną drogą powrotną na twoje konto, jeśli utracisz dostęp do telefonu lub aplikacji TOTP.
+      stPhone: Przejdź do konfiguracji telefonu
+      stTOTP: Przejdź do konfiguracji TOTP
+      back: Cofnij
+  admin:
+      settings:
+        title: Ustawienia Uwierzytelniania
+        help: Uzyskaj konto SID i token uwierzytelnienia z twilio.com/console, a także swój numer telefonu z twilio.com/console/phone-numbers/incoming
+        enable: Włącz Twillio
+        sid: Identyfikator konta SID
+        token: Twillio Auth Token
+        number: Twilio Numer telefonu
